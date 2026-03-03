@@ -1,27 +1,50 @@
 import { Text, TextProps } from 'react-native';
-import { useColorScheme } from '@/components/useColorScheme';
-import { Colors } from './theme';
+import { Colors, FontFamily } from './theme';
 
 interface TypographyProps extends TextProps {
   variant?: 'h1' | 'h2' | 'h3' | 'body' | 'caption';
+  // Use handwriting style for Chinese
+  handwritten?: boolean;
 }
 
-export function Typography({ children, variant = 'body', style, ...props }: TypographyProps) {
-  const colorScheme = useColorScheme();
-  const isDark = colorScheme === 'dark';
-
+export function Typography({ children, variant = 'body', style, handwritten = true, ...props }: TypographyProps) {
   const variantStyles = {
-    h1: { fontSize: 32, fontWeight: '700' as const, letterSpacing: -0.5 },
-    h2: { fontSize: 24, fontWeight: '600' as const },
-    h3: { fontSize: 18, fontWeight: '600' as const },
-    body: { fontSize: 16, fontWeight: '400' as const },
-    caption: { fontSize: 14, fontWeight: '400' as const, color: Colors.text.secondary },
+    h1: {
+      fontSize: 36,
+      fontWeight: '800' as const,
+      letterSpacing: -0.5,
+      color: Colors.text.primary,
+      fontFamily: handwritten ? FontFamily.regular : FontFamily.system,
+    },
+    h2: {
+      fontSize: 26,
+      fontWeight: '700' as const,
+      letterSpacing: -0.3,
+      color: Colors.text.primary,
+      fontFamily: handwritten ? FontFamily.regular : FontFamily.system,
+    },
+    h3: {
+      fontSize: 20,
+      fontWeight: '600' as const,
+      color: Colors.text.primary,
+      fontFamily: handwritten ? FontFamily.regular : FontFamily.system,
+    },
+    body: {
+      fontSize: 16,
+      fontWeight: '500' as const,
+      color: Colors.text.primary,
+      fontFamily: handwritten ? FontFamily.regular : FontFamily.system,
+    },
+    caption: {
+      fontSize: 14,
+      fontWeight: '500' as const,
+      color: Colors.text.secondary,
+      fontFamily: handwritten ? FontFamily.regular : FontFamily.system,
+    },
   };
 
-  const textColor = isDark ? Colors.text.light : Colors.text.primary;
-
   return (
-    <Text style={[{ color: textColor }, variantStyles[variant], style]} {...props}>
+    <Text style={[variantStyles[variant], style]} {...props}>
       {children}
     </Text>
   );

@@ -1,5 +1,3 @@
-export { GlassCard } from './GlassCard';
-export { Button } from './Button';
+export { DoodleButton as Button } from './Button';
 export { Typography } from './Typography';
-export { BigButton } from './BigButton';
-export { Colors, Spacing, BorderRadius } from './theme';
+export { Colors, Spacing, BorderRadius, DoodleShadows, FontFamily } from './theme';

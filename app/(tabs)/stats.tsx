@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { StyleSheet, ScrollView, View, Text } from 'react-native';
-import { BlurView } from 'expo-blur';
 import { initDatabase, getOverallStats, getDailyStats } from '@/db';
-import { GlassCard, Typography, Colors } from '@/components/ui';
+import { Typography, Colors } from '@/components/ui';
 import dayjs from 'dayjs';
 
 export default function StatsScreen() {
@@ -40,44 +39,42 @@ export default function StatsScreen() {
 
   return (
     <View style={styles.container}>
-      <BlurView intensity={80} style={StyleSheet.absoluteFill} />
+      <ScrollView contentContainerStyle={styles.content}>
+        <Typography variant="h1" style={styles.pageTitle}>统计</Typography>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <Typography variant="h2" style={styles.sectionTitle}>
-          总体统计
-        </Typography>
-
-        {/* 统计卡片网格 */}
         <View style={styles.statsGrid}>
-          <StatCard emoji="💩" value={stats?.total_count || 0} label="总次数" suffix="次" />
-          <StatCard emoji="⏱️" value={formatDuration(stats?.total_duration || 0)} label="总时长" />
-          <StatCard
-            emoji="📊"
-            value={formatDuration(Math.round(stats?.avg_duration || 0))}
-            label="平均时长"
-          />
-          <StatCard
-            emoji="🏆"
-            value={formatDuration(stats?.longest_duration || 0)}
-            label="最长时长"
-          />
+          <View style={[styles.statCard, { backgroundColor: Colors.mint }]}>
+            <Text style={styles.statEmoji}>💩</Text>
+            <Text style={styles.statValue}>{stats?.total_count || 0}</Text>
+            <Typography variant="caption">总次数</Typography>
+          </View>
+          <View style={[styles.statCard, { backgroundColor: Colors.sky }]}>
+            <Text style={styles.statEmoji}>⏱️</Text>
+            <Text style={styles.statValue}>{formatDuration(stats?.total_duration || 0)}</Text>
+            <Typography variant="caption">总时长</Typography>
+          </View>
+          <View style={[styles.statCard, { backgroundColor: Colors.pink }]}>
+            <Text style={styles.statEmoji}>📊</Text>
+            <Text style={styles.statValue}>{formatDuration(Math.round(stats?.avg_duration || 0))}</Text>
+            <Typography variant="caption">平均时长</Typography>
+          </View>
+          <View style={[styles.statCard, { backgroundColor: Colors.yellow }]}>
+            <Text style={styles.statEmoji}>🏆</Text>
+            <Text style={styles.statValue}>{formatDuration(stats?.longest_duration || 0)}</Text>
+            <Typography variant="caption">最长时长</Typography>
+          </View>
         </View>
 
-        <Typography variant="h2" style={styles.sectionTitle}>
-          最近7天
-        </Typography>
+        <Typography variant="h2" style={styles.sectionTitle}>最近7天</Typography>
 
-        {/* 每日统计 */}
-        <GlassCard style={styles.dailyCard}>
+        <View style={styles.dailyCard}>
           {dailyStats.map((item, index) => (
             <View key={index} style={styles.dailyItem}>
               <Typography variant="body">{dayjs(item.date).format('MM月DD日')}</Typography>
               <View style={styles.dailyRight}>
-                <Text style={styles.dailyCount}>{item.count}次</Text>
+                <View style={[styles.countBadge, index % 2 === 1 && styles.countBadgePink]}>
+                  <Text style={styles.dailyCount}>{item.count}次</Text>
+                </View>
                 <Typography variant="caption">{formatDuration(item.total_duration)}</Typography>
               </View>
             </View>
@@ -87,36 +84,8 @@ export default function StatsScreen() {
               <Typography variant="caption">暂无数据</Typography>
             </View>
           )}
-        </GlassCard>
-      </ScrollView>
-    </View>
-  );
-}
-
-// 统计卡片组件
-function StatCard({
-  emoji,
-  value,
-  label,
-  suffix = '',
-}: {
-  emoji: string;
-  value: string | number;
-  label: string;
-  suffix?: string;
-}) {
-  return (
-    <View style={styles.statCard}>
-      <BlurView intensity={20} tint="light" style={styles.statBlur}>
-        <View style={styles.statContent}>
-          <Text style={styles.statEmoji}>{emoji}</Text>
-          <Text style={styles.statValue}>
-            {value}
-            {suffix}
-          </Text>
-          <Typography variant="caption">{label}</Typography>
         </View>
-      </BlurView>
+      </ScrollView>
     </View>
   );
 }
@@ -124,15 +93,14 @@ function StatCard({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f4ff',
-  },
-  scrollView: {
-    flex: 1,
+    backgroundColor: Colors.background,
   },
   content: {
     padding: 20,
     paddingTop: 60,
-    paddingBottom: 40,
+  },
+  pageTitle: {
+    marginBottom: 24,
   },
   sectionTitle: {
     marginBottom: 16,
@@ -141,57 +109,59 @@ const styles = StyleSheet.create({
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 24,
+    gap: 14,
+    marginBottom: 28,
   },
   statCard: {
     width: '47%',
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
-  },
-  statBlur: {
-    flex: 1,
-  },
-  statContent: {
-    padding: 16,
+    borderRadius: 24,
+    padding: 20,
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
   statEmoji: {
-    fontSize: 32,
-    marginBottom: 8,
+    fontSize: 40,
+    marginBottom: 10,
   },
   statValue: {
     fontSize: 24,
-    fontWeight: '700',
-    color: Colors.primary,
+    fontWeight: '800',
+    color: Colors.text.primary,
     marginBottom: 4,
   },
   dailyCard: {
-    marginTop: 8,
+    backgroundColor: '#FFF',
+    borderRadius: 16,
+    padding: 16,
   },
   dailyItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0, 0, 0, 0.05)',
+    borderBottomColor: Colors.sketch.light,
   },
   dailyRight: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
   },
+  countBadge: {
+    backgroundColor: Colors.mint,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 16,
+  },
+  countBadgePink: {
+    backgroundColor: Colors.pink,
+  },
   dailyCount: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.success,
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.text.primary,
   },
   empty: {
     alignItems: 'center',
-    paddingVertical: 20,
+    paddingVertical: 24,
   },
 });

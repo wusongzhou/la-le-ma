@@ -1,9 +1,10 @@
-import { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, View, Text, Alert } from 'react-native';
-import { BlurView } from 'expo-blur';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { StyleSheet, View, Text, Modal } from 'react-native';
+import * as Haptics from 'expo-haptics';
+import LottieView from 'lottie-react-native';
 import { initDatabase, startRecord, endRecord, getActiveRecord } from '@/db';
 import { useTimerStore } from '@/store';
-import { BigButton, GlassCard, Typography } from '@/components/ui';
+import { Button, Typography, Colors, FontFamily } from '@/components/ui';
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 
@@ -11,10 +12,11 @@ dayjs.extend(duration);
 
 export default function HomeScreen() {
   const [isReady, setIsReady] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
   const { isRunning, currentRecord, startTime, startTimer, stopTimer } = useTimerStore();
   const [tick, setTick] = useState(0);
+  const confettiRef = useRef<LottieView>(null);
 
-  // 初始化
   useEffect(() => {
     const init = async () => {
       await initDatabase();
@@ -27,18 +29,14 @@ export default function HomeScreen() {
     init();
   }, [startTimer]);
 
-  // 计时器更新
   useEffect(() => {
     if (!isRunning || !startTime) return;
-
     const interval = setInterval(() => {
       setTick((t) => t + 1);
     }, 1000);
-
     return () => clearInterval(interval);
   }, [isRunning, startTime]);
 
-  // 在渲染时计算 elapsed（tick 用于触发重渲染）
   const elapsed = isRunning && startTime ? dayjs().diff(dayjs(startTime), 'second') + tick * 0 : 0;
 
   const formatTime = (seconds: number): string => {
@@ -50,13 +48,17 @@ export default function HomeScreen() {
 
   const handlePress = useCallback(async () => {
     if (!isReady) return;
-
     try {
       if (isRunning && currentRecord) {
+        // 震动反馈
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         await endRecord(currentRecord.id);
         stopTimer();
-        Alert.alert('完成', '记录已保存', [{ text: '好的' }]);
+        // 显示礼花动画
+        setShowConfetti(true);
       } else {
+        // 震动反馈
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         const id = await startRecord();
         const record = {
           id,
@@ -70,9 +72,12 @@ export default function HomeScreen() {
       }
     } catch (error) {
       console.error(error);
-      Alert.alert('错误', '操作失败，请重试');
     }
   }, [isReady, isRunning, currentRecord, startTimer, stopTimer]);
+
+  const handleConfettiFinish = () => {
+    setShowConfetti(false);
+  };
 
   if (!isReady) {
     return (
@@ -84,34 +89,26 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 背景 */}
-      <View style={styles.background}>
-        <BlurView intensity={80} style={StyleSheet.absoluteFill} />
-      </View>
+      {/* Confetti Animation Modal */}
+      <Modal visible={showConfetti} transparent animationType="none">
+        <View style={styles.confettiContainer}>
+          <LottieView
+            ref={confettiRef}
+            source={require('@/assets/animations/confetti.json')}
+            autoPlay
+            loop={false}
+            onAnimationFinish={handleConfettiFinish}
+            style={styles.confetti}
+          />
+        </View>
+      </Modal>
 
-      {/* 内容 */}
       <View style={styles.content}>
-        <Typography variant="h1" style={styles.title}>
-          拉了吗
-        </Typography>
+        {/* Timer */}
+        <Text style={styles.timer}>{formatTime(elapsed)}</Text>
 
-        {/* 计时器卡片 */}
-        <GlassCard style={styles.timerCard}>
-          <View style={styles.timerContainer}>
-            <Text style={styles.timer}>{formatTime(elapsed)}</Text>
-            <Typography variant="caption" style={styles.timerLabel}>
-              {isRunning ? '正在进行中...' : '准备就绪'}
-            </Typography>
-          </View>
-        </GlassCard>
-
-        {/* 主按钮 */}
-        <BigButton isRunning={isRunning} onPress={handlePress} size={180} />
-
-        {/* 提示 */}
-        <Typography variant="caption" style={styles.hint}>
-          {isRunning ? '点击结束记录' : '点击开始计时'}
-        </Typography>
+        {/* Big Button */}
+        <Button isRunning={isRunning} onPress={handlePress} size={200} />
       </View>
     </View>
   );
@@ -120,40 +117,31 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  background: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: '#f0f4ff',
+    backgroundColor: Colors.background,
   },
   content: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
-    paddingTop: 60,
-  },
-  title: {
-    marginBottom: 40,
-  },
-  timerCard: {
-    width: '100%',
-    maxWidth: 300,
-    marginBottom: 60,
-  },
-  timerContainer: {
-    alignItems: 'center',
-    paddingVertical: 20,
   },
   timer: {
     fontSize: 64,
-    fontWeight: '200',
+    fontWeight: '400',
     fontVariant: ['tabular-nums'],
-    color: '#1f2937',
+    color: Colors.text.primary,
+    letterSpacing: 4,
+    fontFamily: FontFamily.mono,
+    marginBottom: 48,
   },
-  timerLabel: {
-    marginTop: 8,
+  confettiContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.1)',
   },
-  hint: {
-    marginTop: 40,
+  confetti: {
+    width: 400,
+    height: 400,
   },
 });

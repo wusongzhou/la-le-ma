@@ -1,6 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, FlatList, TouchableOpacity, Alert, Text, View } from 'react-native';
-import { BlurView } from 'expo-blur';
 import { initDatabase, getAllRecords, deleteRecord, PoopRecord } from '@/db';
 import { Typography, Colors } from '@/components/ui';
 import dayjs from 'dayjs';
@@ -54,32 +53,36 @@ export default function HistoryScreen() {
     ]);
   };
 
-  const renderItem = ({ item }: { item: PoopRecord }) => (
-    <TouchableOpacity
-      style={styles.itemContainer}
-      onLongPress={() => handleDelete(item)}
-      activeOpacity={0.8}
-    >
-      <BlurView intensity={20} tint="light" style={styles.itemBlur}>
-        <View style={styles.itemContent}>
-          <View style={styles.itemLeft}>
-            <Typography variant="h3">{dayjs(item.start_time).format('MM月DD日 HH:mm')}</Typography>
-            <Typography variant="caption" style={styles.note}>
-              {item.note || '无备注'}
-            </Typography>
-          </View>
-          <View style={styles.itemRight}>
-            <Text style={styles.duration}>{formatDuration(item.duration_seconds)}</Text>
+  const renderItem = ({ item, index }: { item: PoopRecord; index: number }) => {
+    const cardColors = [Colors.mint, Colors.pink, Colors.sky];
+    const bgColor = cardColors[index % 3];
+
+    return (
+      <TouchableOpacity
+        style={styles.itemContainer}
+        onLongPress={() => handleDelete(item)}
+        activeOpacity={0.85}
+      >
+        <View style={[styles.itemCard, { backgroundColor: bgColor }]}>
+          <View style={styles.itemContent}>
+            <View style={styles.itemLeft}>
+              <Typography variant="h3">{dayjs(item.start_time).format('MM月DD日 HH:mm')}</Typography>
+              <Typography variant="caption" style={styles.note}>
+                {item.note || '无备注'}
+              </Typography>
+            </View>
+            <View style={styles.durationBadge}>
+              <Text style={styles.duration}>{formatDuration(item.duration_seconds)}</Text>
+            </View>
           </View>
         </View>
-      </BlurView>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   if (isLoading) {
     return (
       <View style={styles.container}>
-        <BlurView intensity={80} style={StyleSheet.absoluteFill} />
         <Typography>加载中...</Typography>
       </View>
     );
@@ -87,7 +90,10 @@ export default function HistoryScreen() {
 
   return (
     <View style={styles.container}>
-      <BlurView intensity={80} style={StyleSheet.absoluteFill} />
+      <View style={styles.header}>
+        <Typography variant="h1">历史记录</Typography>
+      </View>
+
       <FlatList
         data={records}
         keyExtractor={(item) => item.id.toString()}
@@ -95,16 +101,12 @@ export default function HistoryScreen() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyEmoji}>🚽</Text>
-            <Typography variant="body" style={styles.emptyText}>
-              暂无记录
-            </Typography>
-            <Typography variant="caption">去首页开始第一次记录吧</Typography>
+            <Typography variant="h2">暂无记录</Typography>
           </View>
         }
         contentContainerStyle={styles.list}
         onRefresh={loadRecords}
         refreshing={isLoading}
-        showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -113,28 +115,27 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f0f4ff',
+    backgroundColor: Colors.background,
+  },
+  header: {
+    paddingTop: 60,
+    padding: 20,
   },
   list: {
     padding: 20,
-    paddingTop: 60,
+    paddingTop: 0,
   },
   itemContainer: {
-    marginBottom: 12,
-    borderRadius: 16,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.3)',
+    marginBottom: 16,
   },
-  itemBlur: {
-    flex: 1,
+  itemCard: {
+    padding: 18,
+    borderRadius: 16,
   },
   itemContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'rgba(255, 255, 255, 0.3)',
   },
   itemLeft: {
     flex: 1,
@@ -142,23 +143,23 @@ const styles = StyleSheet.create({
   note: {
     marginTop: 4,
   },
-  itemRight: {
-    marginLeft: 12,
+  durationBadge: {
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
   },
   duration: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-    color: Colors.success,
+    color: Colors.text.primary,
   },
   empty: {
     alignItems: 'center',
-    marginTop: 60,
+    marginTop: 80,
   },
   emptyEmoji: {
-    fontSize: 64,
+    fontSize: 48,
     marginBottom: 16,
-  },
-  emptyText: {
-    marginBottom: 8,
   },
 });
