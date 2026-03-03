@@ -1,23 +1,22 @@
 // Simple theme for the app
 
 export const Colors = {
+  // New color palette
+  yellow: '#FFF7CD',    // 浅黄色
+  orange: '#FDC3A1',   // 浅橙色
+  pink: '#FB9B8F',     // 浅粉色
+  magenta: '#F57799',   // 玫红色
+
+  // Keep mint for button
   mint: '#7FCC9E',
   mintLight: '#A8E6BE',
   mintDark: '#5DB87A',
-
-  pink: '#F4A4B5',
-  pinkLight: '#F9C4CE',
-  pinkDark: '#E8889E',
 
   sky: '#7CB8DC',
   skyLight: '#A8D0E8',
   skyDark: '#5A9AC4',
 
-  yellow: '#F5D76E',
-  orange: '#F5A962',
-  purple: '#B794D6',
-
-  background: '#FFF8E7',
+  background: '#FFFDF1',
 
   text: {
     primary: '#4A4A4A',
@@ -30,8 +29,10 @@ export const Colors = {
 
   border: {
     mint: '#5DB87A',
-    pink: '#E8889E',
+    pink: '#FB9B8F',
     sky: '#5A9AC4',
+    orange: '#FDC3A1',
+    yellow: '#E5C450',
   },
 
   sketch: {
@@ -39,7 +40,7 @@ export const Colors = {
     medium: '#6B6B6B',
     light: '#9A9A9A',
     mint: '#7FCC9E',
-    pink: '#F4A4B5',
+    pink: '#FB9B8F',
     sky: '#7CB8DC',
     yellow: '#F5D76E',
   },

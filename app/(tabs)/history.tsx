@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, FlatList, TouchableOpacity, Alert, Text, View } from 'react-native';
+import { StyleSheet, FlatList, View, Text, TouchableOpacity } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { initDatabase, getAllRecords, deleteRecord, PoopRecord } from '@/db';
 import { Typography, Colors } from '@/components/ui';
 import dayjs from 'dayjs';
@@ -39,44 +40,44 @@ export default function HistoryScreen() {
     return `${min}分${sec}秒`;
   };
 
-  const handleDelete = (record: PoopRecord) => {
-    Alert.alert('删除记录', '确定要删除这条记录吗？', [
-      { text: '取消', style: 'cancel' },
-      {
-        text: '删除',
-        style: 'destructive',
-        onPress: async () => {
-          await deleteRecord(record.id);
-          await loadRecords();
-        },
-      },
-    ]);
+  const handleDelete = async (id: number) => {
+    await deleteRecord(id);
+    await loadRecords();
   };
 
+  const renderRightActions = (id: number, close: any) => (
+    <TouchableOpacity
+      style={styles.deleteAction}
+      onPress={() => {
+        close();
+        setTimeout(() => handleDelete(id), 200);
+      }}
+    >
+      <Text style={styles.deleteText}>删除</Text>
+    </TouchableOpacity>
+  );
+
   const renderItem = ({ item, index }: { item: PoopRecord; index: number }) => {
-    const cardColors = [Colors.mint, Colors.pink, Colors.sky];
+    const cardColors = [Colors.yellow, Colors.orange, Colors.pink];
     const bgColor = cardColors[index % 3];
 
     return (
-      <TouchableOpacity
-        style={styles.itemContainer}
-        onLongPress={() => handleDelete(item)}
-        activeOpacity={0.85}
+      <Swipeable
+        renderRightActions={(progress, dragX, close) => renderRightActions(item.id, close)}
+        rightThreshold={40}
+        overshootRight={false}
       >
         <View style={[styles.itemCard, { backgroundColor: bgColor }]}>
           <View style={styles.itemContent}>
             <View style={styles.itemLeft}>
               <Typography variant="h3">{dayjs(item.start_time).format('MM月DD日 HH:mm')}</Typography>
-              <Typography variant="caption" style={styles.note}>
-                {item.note || '无备注'}
-              </Typography>
             </View>
             <View style={styles.durationBadge}>
               <Text style={styles.duration}>{formatDuration(item.duration_seconds)}</Text>
             </View>
           </View>
         </View>
-      </TouchableOpacity>
+      </Swipeable>
     );
   };
 
@@ -107,6 +108,7 @@ export default function HistoryScreen() {
         contentContainerStyle={styles.list}
         onRefresh={loadRecords}
         refreshing={isLoading}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
       />
     </View>
   );
@@ -125,23 +127,22 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 0,
   },
-  itemContainer: {
-    marginBottom: 16,
+  separator: {
+    height: 8,
   },
   itemCard: {
-    padding: 18,
-    borderRadius: 16,
+    borderRadius: 0,
+    borderWidth: 3,
+    borderColor: Colors.sketch.dark,
   },
   itemContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    padding: 18,
   },
   itemLeft: {
     flex: 1,
-  },
-  note: {
-    marginTop: 4,
   },
   durationBadge: {
     backgroundColor: 'rgba(255,255,255,0.5)',
@@ -161,5 +162,16 @@ const styles = StyleSheet.create({
   emptyEmoji: {
     fontSize: 48,
     marginBottom: 16,
+  },
+  deleteAction: {
+    backgroundColor: Colors.magenta,
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: 80,
+  },
+  deleteText: {
+    color: '#FFF',
+    fontWeight: '700',
+    fontSize: 16,
   },
 });

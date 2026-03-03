@@ -10,6 +10,20 @@ import duration from 'dayjs/plugin/duration';
 
 dayjs.extend(duration);
 
+// 防抖 Hook
+function useDebounce(callback: () => void, delay: number, enabled: boolean) {
+  const ref = useRef<boolean>(false);
+
+  return useCallback(() => {
+    if (!enabled || ref.current) return;
+    ref.current = true;
+    callback();
+    setTimeout(() => {
+      ref.current = false;
+    }, delay);
+  }, [callback, delay, enabled]);
+}
+
 export default function HomeScreen() {
   const [isReady, setIsReady] = useState(false);
   const [showConfetti, setShowConfetti] = useState(false);
@@ -46,7 +60,7 @@ export default function HomeScreen() {
     return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handlePress = useCallback(async () => {
+  const handlePressRaw = useCallback(async () => {
     if (!isReady) return;
     try {
       if (isRunning && currentRecord) {
@@ -65,7 +79,6 @@ export default function HomeScreen() {
           start_time: dayjs().toISOString(),
           end_time: null,
           duration_seconds: null,
-          note: null,
           created_at: dayjs().toISOString(),
         };
         startTimer(record);
@@ -74,6 +87,9 @@ export default function HomeScreen() {
       console.error(error);
     }
   }, [isReady, isRunning, currentRecord, startTimer, stopTimer]);
+
+  // 防抖：1秒内不能重复点击
+  const handlePress = useDebounce(handlePressRaw, 1000, isReady);
 
   const handleConfettiFinish = () => {
     setShowConfetti(false);

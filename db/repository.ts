@@ -12,7 +12,7 @@ export const startRecord = async (): Promise<number> => {
 };
 
 // 结束计时
-export const endRecord = async (id: number, note?: string): Promise<void> => {
+export const endRecord = async (id: number): Promise<void> => {
   const db = getDatabase();
   const record = await getRecordById(id);
   if (!record) throw new Error('Record not found');
@@ -22,8 +22,8 @@ export const endRecord = async (id: number, note?: string): Promise<void> => {
   const durationSeconds = endTime.diff(startTime, 'second');
 
   await db.runAsync(
-    'UPDATE poop_records SET end_time = ?, duration_seconds = ?, note = ? WHERE id = ?',
-    [endTime.toISOString(), durationSeconds, note || null, id]
+    'UPDATE poop_records SET end_time = ?, duration_seconds = ? WHERE id = ?',
+    [endTime.toISOString(), durationSeconds, id]
   );
 };
 

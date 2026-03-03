@@ -43,12 +43,12 @@ export default function StatsScreen() {
         <Typography variant="h1" style={styles.pageTitle}>统计</Typography>
 
         <View style={styles.statsGrid}>
-          <View style={[styles.statCard, { backgroundColor: Colors.mint }]}>
+          <View style={[styles.statCard, { backgroundColor: Colors.yellow }]}>
             <Text style={styles.statEmoji}>💩</Text>
             <Text style={styles.statValue}>{stats?.total_count || 0}</Text>
             <Typography variant="caption">总次数</Typography>
           </View>
-          <View style={[styles.statCard, { backgroundColor: Colors.sky }]}>
+          <View style={[styles.statCard, { backgroundColor: Colors.orange }]}>
             <Text style={styles.statEmoji}>⏱️</Text>
             <Text style={styles.statValue}>{formatDuration(stats?.total_duration || 0)}</Text>
             <Typography variant="caption">总时长</Typography>
@@ -58,7 +58,7 @@ export default function StatsScreen() {
             <Text style={styles.statValue}>{formatDuration(Math.round(stats?.avg_duration || 0))}</Text>
             <Typography variant="caption">平均时长</Typography>
           </View>
-          <View style={[styles.statCard, { backgroundColor: Colors.yellow }]}>
+          <View style={[styles.statCard, { backgroundColor: Colors.magenta }]}>
             <Text style={styles.statEmoji}>🏆</Text>
             <Text style={styles.statValue}>{formatDuration(stats?.longest_duration || 0)}</Text>
             <Typography variant="caption">最长时长</Typography>
@@ -72,7 +72,7 @@ export default function StatsScreen() {
             <View key={index} style={styles.dailyItem}>
               <Typography variant="body">{dayjs(item.date).format('MM月DD日')}</Typography>
               <View style={styles.dailyRight}>
-                <View style={[styles.countBadge, index % 2 === 1 && styles.countBadgePink]}>
+                <View style={[styles.countBadge, index % 2 === 1 && styles.countBadgeAlt]}>
                   <Text style={styles.dailyCount}>{item.count}次</Text>
                 </View>
                 <Typography variant="caption">{formatDuration(item.total_duration)}</Typography>
@@ -117,6 +117,8 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 20,
     alignItems: 'center',
+    borderWidth: 3,
+    borderColor: Colors.sketch.dark,
   },
   statEmoji: {
     fontSize: 40,
@@ -147,13 +149,13 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   countBadge: {
-    backgroundColor: Colors.mint,
+    backgroundColor: Colors.yellow,
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 16,
   },
-  countBadgePink: {
-    backgroundColor: Colors.pink,
+  countBadgeAlt: {
+    backgroundColor: Colors.orange,
   },
   dailyCount: {
     fontSize: 15,

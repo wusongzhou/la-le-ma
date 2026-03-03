@@ -14,7 +14,6 @@ export const initDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
       start_time TEXT NOT NULL,
       end_time TEXT,
       duration_seconds INTEGER,
-      note TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
   `);
