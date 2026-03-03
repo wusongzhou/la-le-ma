@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TextProps } from 'react-native';
+import { Text, TextProps } from 'react-native';
 import { useColorScheme } from '@/components/useColorScheme';
 import { Colors } from './theme';
 
@@ -21,14 +21,7 @@ export function Typography({ children, variant = 'body', style, ...props }: Typo
   const textColor = isDark ? Colors.text.light : Colors.text.primary;
 
   return (
-    <Text
-      style={[
-        { color: textColor },
-        variantStyles[variant],
-        style,
-      ]}
-      {...props}
-    >
+    <Text style={[{ color: textColor }, variantStyles[variant], style]} {...props}>
       {children}
     </Text>
   );

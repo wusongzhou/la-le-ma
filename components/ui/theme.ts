@@ -1,10 +1,10 @@
 // 毛玻璃风格主题配置
 export const Colors = {
   // 主色调
-  primary: '#6366f1',      // 靛蓝色
-  success: '#22c55e',      // 绿色
-  danger: '#ef4444',       // 红色
-  warning: '#f59e0b',      // 橙色
+  primary: '#6366f1', // 靛蓝色
+  success: '#22c55e', // 绿色
+  danger: '#ef4444', // 红色
+  warning: '#f59e0b', // 橙色
 
   // 背景渐变
   background: {

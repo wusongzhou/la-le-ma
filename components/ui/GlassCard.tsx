@@ -14,14 +14,8 @@ export function GlassCard({ children, style, intensity = 20 }: GlassCardProps) {
 
   return (
     <View style={[styles.cardContainer, style]}>
-      <BlurView
-        intensity={intensity}
-        tint={isDark ? 'dark' : 'light'}
-        style={styles.blur}
-      >
-        <View style={[styles.cardContent, isDark && styles.cardContentDark]}>
-          {children}
-        </View>
+      <BlurView intensity={intensity} tint={isDark ? 'dark' : 'light'} style={styles.blur}>
+        <View style={[styles.cardContent, isDark && styles.cardContentDark]}>{children}</View>
       </BlurView>
     </View>
   );

@@ -1,14 +1,13 @@
 import { getDatabase } from './database';
-import type { PoopRecord, PoopRecordInsert, DailyStats } from './types';
+import type { PoopRecord, DailyStats } from './types';
 import dayjs from 'dayjs';
 
 // 创建新记录（开始计时）
 export const startRecord = async (): Promise<number> => {
   const db = getDatabase();
-  const result = await db.runAsync(
-    'INSERT INTO poop_records (start_time) VALUES (?)',
-    [dayjs().toISOString()]
-  );
+  const result = await db.runAsync('INSERT INTO poop_records (start_time) VALUES (?)', [
+    dayjs().toISOString(),
+  ]);
   return result.lastInsertRowId;
 };
 
@@ -31,10 +30,9 @@ export const endRecord = async (id: number, note?: string): Promise<void> => {
 // 获取单条记录
 export const getRecordById = async (id: number): Promise<PoopRecord | null> => {
   const db = getDatabase();
-  const result = await db.getFirstAsync<PoopRecord>(
-    'SELECT * FROM poop_records WHERE id = ?',
-    [id]
-  );
+  const result = await db.getFirstAsync<PoopRecord>('SELECT * FROM poop_records WHERE id = ?', [
+    id,
+  ]);
   return result || null;
 };
 
@@ -52,7 +50,7 @@ export const getAllRecords = async (limit = 50): Promise<PoopRecord[]> => {
 export const getActiveRecord = async (): Promise<PoopRecord | null> => {
   const db = getDatabase();
   const result = await db.getFirstAsync<PoopRecord>(
-    "SELECT * FROM poop_records WHERE end_time IS NULL ORDER BY id DESC LIMIT 1"
+    'SELECT * FROM poop_records WHERE end_time IS NULL ORDER BY id DESC LIMIT 1'
   );
   return result || null;
 };

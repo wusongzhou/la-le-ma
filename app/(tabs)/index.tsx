@@ -12,8 +12,9 @@ dayjs.extend(duration);
 export default function HomeScreen() {
   const [isReady, setIsReady] = useState(false);
   const { isRunning, currentRecord, startTime, startTimer, stopTimer } = useTimerStore();
-  const [elapsed, setElapsed] = useState(0);
+  const [tick, setTick] = useState(0);
 
+  // 初始化
   useEffect(() => {
     const init = async () => {
       await initDatabase();
@@ -24,23 +25,21 @@ export default function HomeScreen() {
       setIsReady(true);
     };
     init();
-  }, []);
+  }, [startTimer]);
 
+  // 计时器更新
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
+    if (!isRunning || !startTime) return;
 
-    if (isRunning && startTime) {
-      interval = setInterval(() => {
-        setElapsed(dayjs().diff(dayjs(startTime), 'second'));
-      }, 1000);
-    } else {
-      setElapsed(0);
-    }
+    const interval = setInterval(() => {
+      setTick((t) => t + 1);
+    }, 1000);
 
-    return () => {
-      if (interval) clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [isRunning, startTime]);
+
+  // 在渲染时计算 elapsed（tick 用于触发重渲染）
+  const elapsed = isRunning && startTime ? dayjs().diff(dayjs(startTime), 'second') + tick * 0 : 0;
 
   const formatTime = (seconds: number): string => {
     const d = dayjs.duration(seconds, 'seconds');
@@ -92,7 +91,9 @@ export default function HomeScreen() {
 
       {/* 内容 */}
       <View style={styles.content}>
-        <Typography variant="h1" style={styles.title}>拉了吗</Typography>
+        <Typography variant="h1" style={styles.title}>
+          拉了吗
+        </Typography>
 
         {/* 计时器卡片 */}
         <GlassCard style={styles.timerCard}>

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { StyleSheet, FlatList, TouchableOpacity, Alert, Text, View } from 'react-native';
 import { BlurView } from 'expo-blur';
 import { initDatabase, getAllRecords, deleteRecord, PoopRecord } from '@/db';
-import { GlassCard, Typography, Colors } from '@/components/ui';
+import { Typography, Colors } from '@/components/ui';
 import dayjs from 'dayjs';
 
 export default function HistoryScreen() {
@@ -41,21 +41,17 @@ export default function HistoryScreen() {
   };
 
   const handleDelete = (record: PoopRecord) => {
-    Alert.alert(
-      '删除记录',
-      '确定要删除这条记录吗？',
-      [
-        { text: '取消', style: 'cancel' },
-        {
-          text: '删除',
-          style: 'destructive',
-          onPress: async () => {
-            await deleteRecord(record.id);
-            await loadRecords();
-          },
+    Alert.alert('删除记录', '确定要删除这条记录吗？', [
+      { text: '取消', style: 'cancel' },
+      {
+        text: '删除',
+        style: 'destructive',
+        onPress: async () => {
+          await deleteRecord(record.id);
+          await loadRecords();
         },
-      ]
-    );
+      },
+    ]);
   };
 
   const renderItem = ({ item }: { item: PoopRecord }) => (
@@ -67,17 +63,13 @@ export default function HistoryScreen() {
       <BlurView intensity={20} tint="light" style={styles.itemBlur}>
         <View style={styles.itemContent}>
           <View style={styles.itemLeft}>
-            <Typography variant="h3">
-              {dayjs(item.start_time).format('MM月DD日 HH:mm')}
-            </Typography>
+            <Typography variant="h3">{dayjs(item.start_time).format('MM月DD日 HH:mm')}</Typography>
             <Typography variant="caption" style={styles.note}>
               {item.note || '无备注'}
             </Typography>
           </View>
           <View style={styles.itemRight}>
-            <Text style={styles.duration}>
-              {formatDuration(item.duration_seconds)}
-            </Text>
+            <Text style={styles.duration}>{formatDuration(item.duration_seconds)}</Text>
           </View>
         </View>
       </BlurView>
@@ -103,7 +95,9 @@ export default function HistoryScreen() {
         ListEmptyComponent={
           <View style={styles.empty}>
             <Text style={styles.emptyEmoji}>🚽</Text>
-            <Typography variant="body" style={styles.emptyText}>暂无记录</Typography>
+            <Typography variant="body" style={styles.emptyText}>
+              暂无记录
+            </Typography>
             <Typography variant="caption">去首页开始第一次记录吧</Typography>
           </View>
         }

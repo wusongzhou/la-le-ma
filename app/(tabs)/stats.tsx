@@ -47,21 +47,14 @@ export default function StatsScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <Typography variant="h2" style={styles.sectionTitle}>总体统计</Typography>
+        <Typography variant="h2" style={styles.sectionTitle}>
+          总体统计
+        </Typography>
 
         {/* 统计卡片网格 */}
         <View style={styles.statsGrid}>
-          <StatCard
-            emoji="💩"
-            value={stats?.total_count || 0}
-            label="总次数"
-            suffix="次"
-          />
-          <StatCard
-            emoji="⏱️"
-            value={formatDuration(stats?.total_duration || 0)}
-            label="总时长"
-          />
+          <StatCard emoji="💩" value={stats?.total_count || 0} label="总次数" suffix="次" />
+          <StatCard emoji="⏱️" value={formatDuration(stats?.total_duration || 0)} label="总时长" />
           <StatCard
             emoji="📊"
             value={formatDuration(Math.round(stats?.avg_duration || 0))}
@@ -74,20 +67,18 @@ export default function StatsScreen() {
           />
         </View>
 
-        <Typography variant="h2" style={styles.sectionTitle}>最近7天</Typography>
+        <Typography variant="h2" style={styles.sectionTitle}>
+          最近7天
+        </Typography>
 
         {/* 每日统计 */}
         <GlassCard style={styles.dailyCard}>
           {dailyStats.map((item, index) => (
             <View key={index} style={styles.dailyItem}>
-              <Typography variant="body">
-                {dayjs(item.date).format('MM月DD日')}
-              </Typography>
+              <Typography variant="body">{dayjs(item.date).format('MM月DD日')}</Typography>
               <View style={styles.dailyRight}>
                 <Text style={styles.dailyCount}>{item.count}次</Text>
-                <Typography variant="caption">
-                  {formatDuration(item.total_duration)}
-                </Typography>
+                <Typography variant="caption">{formatDuration(item.total_duration)}</Typography>
               </View>
             </View>
           ))}
@@ -103,7 +94,12 @@ export default function StatsScreen() {
 }
 
 // 统计卡片组件
-function StatCard({ emoji, value, label, suffix = '' }: {
+function StatCard({
+  emoji,
+  value,
+  label,
+  suffix = '',
+}: {
   emoji: string;
   value: string | number;
   label: string;
@@ -115,7 +111,8 @@ function StatCard({ emoji, value, label, suffix = '' }: {
         <View style={styles.statContent}>
           <Text style={styles.statEmoji}>{emoji}</Text>
           <Text style={styles.statValue}>
-            {value}{suffix}
+            {value}
+            {suffix}
           </Text>
           <Typography variant="caption">{label}</Typography>
         </View>

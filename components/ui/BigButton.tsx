@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { BlurView } from 'expo-blur';
 import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
 import { Colors } from './theme';
@@ -9,37 +10,29 @@ interface BigButtonProps {
 }
 
 export function BigButton({ isRunning, onPress, size = 160 }: BigButtonProps) {
+  const dynamicStyles = useMemo(
+    () => ({
+      container: { width: size, height: size, borderRadius: size / 2 },
+      blur: { borderRadius: size / 2 },
+      inner: {
+        borderRadius: size / 2,
+        backgroundColor: isRunning ? 'rgba(239, 68, 68, 0.3)' : 'rgba(34, 197, 94, 0.3)',
+      },
+      text: { color: isRunning ? Colors.danger : Colors.success },
+    }),
+    [size, isRunning]
+  );
+
   return (
     <TouchableOpacity
-      style={[
-        styles.container,
-        { width: size, height: size, borderRadius: size / 2 },
-      ]}
+      style={[styles.container, dynamicStyles.container]}
       onPress={onPress}
       activeOpacity={0.9}
     >
-      <BlurView
-        intensity={40}
-        tint="light"
-        style={[styles.blur, { borderRadius: size / 2 }]}
-      >
-        <View
-          style={[
-            styles.inner,
-            {
-              borderRadius: size / 2,
-              backgroundColor: isRunning
-                ? 'rgba(239, 68, 68, 0.3)'
-                : 'rgba(34, 197, 94, 0.3)',
-            },
-          ]}
-        >
-          <Text style={styles.emoji}>
-            {isRunning ? '💩' : '🚽'}
-          </Text>
-          <Text style={[styles.text, { color: isRunning ? Colors.danger : Colors.success }]}>
-            {isRunning ? '结束' : '开始'}
-          </Text>
+      <BlurView intensity={40} tint="light" style={[styles.blur, dynamicStyles.blur]}>
+        <View style={[styles.inner, dynamicStyles.inner]}>
+          <Text style={styles.emoji}>{isRunning ? '💩' : '🚽'}</Text>
+          <Text style={[styles.text, dynamicStyles.text]}>{isRunning ? '结束' : '开始'}</Text>
         </View>
       </BlurView>
     </TouchableOpacity>
