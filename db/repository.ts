@@ -62,9 +62,9 @@ export const deleteRecord = async (id: number): Promise<void> => {
 };
 
 // 获取每日统计
-export const getDailyStats = async (days = 30): Promise<DailyStats[]> => {
+export const getDailyStats = async (days: number = 30, startDate?: string): Promise<DailyStats[]> => {
   const db = getDatabase();
-  const startDate = dayjs().subtract(days, 'day').format('YYYY-MM-DD');
+  const start = startDate || dayjs().subtract(days, 'day').format('YYYY-MM-DD');
 
   const results = await db.getAllAsync<DailyStats>(
     `SELECT
@@ -76,14 +76,27 @@ export const getDailyStats = async (days = 30): Promise<DailyStats[]> => {
     WHERE DATE(start_time) >= ?
     GROUP BY DATE(start_time)
     ORDER BY date DESC`,
-    [startDate]
+    [start]
   );
   return results;
 };
 
 // 获取总体统计
-export const getOverallStats = async () => {
+export const getOverallStats = async (startDate?: string, endDate?: string) => {
   const db = getDatabase();
+
+  let whereClause = 'WHERE end_time IS NOT NULL';
+  const params: string[] = [];
+
+  if (startDate) {
+    whereClause += ' AND DATE(start_time) >= ?';
+    params.push(startDate);
+  }
+  if (endDate) {
+    whereClause += ' AND DATE(start_time) <= ?';
+    params.push(endDate);
+  }
+
   const result = await db.getFirstAsync<{
     total_count: number;
     total_duration: number;
@@ -98,7 +111,8 @@ export const getOverallStats = async () => {
       COALESCE(MAX(duration_seconds), 0) as longest_duration,
       COALESCE(MIN(duration_seconds), 0) as shortest_duration
     FROM poop_records
-    WHERE end_time IS NOT NULL`
+    ${whereClause}`,
+    params
   );
   return result;
 };

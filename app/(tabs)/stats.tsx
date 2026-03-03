@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { StyleSheet, ScrollView, View, Text } from 'react-native';
+import { StyleSheet, ScrollView, View, Text, TouchableOpacity } from 'react-native';
 import { initDatabase, getOverallStats, getDailyStats } from '@/db';
 import { Typography, Colors } from '@/components/ui';
 import dayjs from 'dayjs';
@@ -17,16 +17,28 @@ export default function StatsScreen() {
     { date: string; count: number; total_duration: number; avg_duration: number }[]
   >([]);
 
+  // 当前查看的月份，默认为当月
+  const [currentMonth, setCurrentMonth] = useState(dayjs());
+
+  // 计算月初和月末
+  const startOfMonth = currentMonth.startOf('month').format('YYYY-MM-DD');
+  const endOfMonth = currentMonth.endOf('month').format('YYYY-MM-DD');
+
+  const loadStats = async () => {
+    const overall = await getOverallStats(startOfMonth, endOfMonth);
+    setStats(overall);
+    const days = currentMonth.endOf('month').date();
+    const daily = await getDailyStats(days, startOfMonth);
+    setDailyStats(daily);
+  };
+
   useEffect(() => {
     const init = async () => {
       await initDatabase();
-      const overall = await getOverallStats();
-      setStats(overall);
-      const daily = await getDailyStats(7);
-      setDailyStats(daily);
+      await loadStats();
     };
     init();
-  }, []);
+  }, [currentMonth]);
 
   const formatDuration = (seconds: number): string => {
     const hours = Math.floor(seconds / 3600);
@@ -37,21 +49,49 @@ export default function StatsScreen() {
     return `${min}分钟`;
   };
 
+  // 切换到上一个月
+  const goToPrevMonth = () => {
+    setCurrentMonth(currentMonth.subtract(1, 'month'));
+  };
+
+  // 切换到下一个月
+  const goToNextMonth = () => {
+    const nextMonth = currentMonth.add(1, 'month');
+    if (nextMonth.isAfter(dayjs())) return;
+    setCurrentMonth(nextMonth);
+  };
+
+  // 是否可以切换到下一个月
+  const canGoNext = currentMonth.add(1, 'month').isBefore(dayjs().add(1, 'month'));
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Typography variant="h1" style={styles.pageTitle}>统计</Typography>
+        {/* 月份切换 */}
+        <View style={styles.monthSelector}>
+          <TouchableOpacity onPress={goToPrevMonth} style={styles.monthButton}>
+            <Text style={styles.monthButtonText}>‹</Text>
+          </TouchableOpacity>
+          <Text style={styles.monthText}>{currentMonth.format('YYYY年MM月')}</Text>
+          <TouchableOpacity
+            onPress={goToNextMonth}
+            style={[styles.monthButton, !canGoNext && styles.monthButtonDisabled]}
+            disabled={!canGoNext}
+          >
+            <Text style={[styles.monthButtonText, !canGoNext && styles.monthButtonTextDisabled]}>›</Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.statsGrid}>
           <View style={[styles.statCard, { backgroundColor: Colors.yellow }]}>
             <Text style={styles.statEmoji}>💩</Text>
             <Text style={styles.statValue}>{stats?.total_count || 0}</Text>
-            <Typography variant="caption">总次数</Typography>
+            <Typography variant="caption">本月次数</Typography>
           </View>
           <View style={[styles.statCard, { backgroundColor: Colors.orange }]}>
             <Text style={styles.statEmoji}>⏱️</Text>
             <Text style={styles.statValue}>{formatDuration(stats?.total_duration || 0)}</Text>
-            <Typography variant="caption">总时长</Typography>
+            <Typography variant="caption">本月时长</Typography>
           </View>
           <View style={[styles.statCard, { backgroundColor: Colors.pink }]}>
             <Text style={styles.statEmoji}>📊</Text>
@@ -65,7 +105,7 @@ export default function StatsScreen() {
           </View>
         </View>
 
-        <Typography variant="h2" style={styles.sectionTitle}>最近7天</Typography>
+        <Typography variant="h2" style={styles.sectionTitle}>{currentMonth.format('MM月')}</Typography>
 
         <View style={styles.dailyCard}>
           {dailyStats.map((item, index) => (
@@ -99,8 +139,33 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingTop: 60,
   },
-  pageTitle: {
+  monthSelector: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 24,
+  },
+  monthButton: {
+    padding: 10,
+  },
+  monthButtonDisabled: {
+    opacity: 0.3,
+  },
+  monthButtonText: {
+    fontSize: 32,
+    fontWeight: '600',
+    color: Colors.text.primary,
+  },
+  monthButtonTextDisabled: {
+    color: Colors.sketch.light,
+  },
+  monthText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: Colors.text.primary,
+    marginHorizontal: 20,
+    minWidth: 140,
+    textAlign: 'center',
   },
   sectionTitle: {
     marginBottom: 16,
