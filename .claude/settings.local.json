@@ -9,7 +9,26 @@
       "Bash(npm install:*)",
       "Bash(npx expo:*)",
       "Bash(ls:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(npm start:*)",
+      "Bash(eas --version:*)",
+      "Bash(sudo apt update:*)",
+      "Bash(sudo apt install:*)",
+      "Bash(java -version:*)",
+      "Bash(echo:*)",
+      "Bash(export:*)",
+      "Bash(yes:*)",
+      "Bash(sdkmanager:*)",
+      "Bash(printf:*)",
+      "Bash($ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager:*)",
+      "Bash(~/android-sdk/cmdline-tools/latest/bin/sdkmanager:*)",
+      "Bash(~/android-sdk/platform-tools/adb --version:*)",
+      "Bash(~/.bashrc)",
+      "Bash(~/.bashrc:*)",
+      "Bash(./gradlew assembleRelease:*)",
+      "Bash(~/.gradle/wrapper/dists/gradle-9.0-bin/gradle-9.0.0/bin/gradle:*)",
+      "Bash(./gradlew:*)",
+      "Bash(/home/wsz/android-sdk/cmdline-tools/latest/bin/sdkmanager:*)"
     ]
   }
 }

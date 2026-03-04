@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
-import { StyleSheet, TouchableOpacity, View, Text } from 'react-native';
+import React, { useCallback, useMemo, useRef } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, {
-  useAnimatedStyle,
-  withSpring,
-  useSharedValue,
+    useAnimatedStyle,
+    useSharedValue,
+    withSequence,
+    withSpring,
 } from 'react-native-reanimated';
 import { Colors, DoodleShadows, FontFamily } from './theme';
 
@@ -15,20 +16,45 @@ interface DoodleButtonProps {
 
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
+const RUNNING_EMOJIS = ['⭐', '✨', '🎉', '💩', '🔥'];
+const IDLE_EMOJIS = ['💨', '✨', '🚽', '💫'];
+
 export function DoodleButton({ isRunning, onPress, size = 160 }: DoodleButtonProps) {
   const scale = useSharedValue(1);
+  const rotate = useSharedValue(0);
+  const buttonRef = useRef<View>(null);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
+    transform: [
+      { scale: scale.value },
+      { rotate: `${rotate.value}deg` },
+    ],
   }));
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.92, { damping: 15, stiffness: 400 });
+    // 压缩效果
+    scale.value = withSpring(0.88, { damping: 12, stiffness: 400 });
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1, { damping: 15, stiffness: 400 });
+    // 果冻弹跳效果
+    scale.value = withSequence(
+      withSpring(1.08, { damping: 8, stiffness: 300 }),
+      withSpring(0.98, { damping: 10, stiffness: 300 }),
+      withSpring(1, { damping: 12, stiffness: 300 })
+    );
   };
+
+  const handlePress = useCallback(() => {
+    // 旋转动画
+    rotate.value = withSequence(
+      withSpring(isRunning ? -10 : 10, { damping: 8, stiffness: 200 }),
+      withSpring(isRunning ? 5 : -5, { damping: 8, stiffness: 200 }),
+      withSpring(0, { damping: 10, stiffness: 200 })
+    );
+
+    onPress();
+  }, [isRunning, onPress, rotate]);
 
   const dynamicStyles = useMemo(() => {
     const bgColor = isRunning ? Colors.pink : Colors.mint;
@@ -56,23 +82,26 @@ export function DoodleButton({ isRunning, onPress, size = 160 }: DoodleButtonPro
   }, [size, isRunning]);
 
   return (
-    <AnimatedTouchable
-      style={[styles.container, dynamicStyles.container, animatedStyle]}
-      onPress={onPress}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      activeOpacity={1}
-    >
-      <View style={[styles.inner, dynamicStyles.inner]}>
-        <Text style={styles.emoji}>{isRunning ? '💩' : '🚽'}</Text>
-        <Text style={[styles.text, { color: dynamicStyles.textColor }]}>
-          {isRunning ? '结束' : '开始'}
-        </Text>
-      </View>
-      {/* Decorative doodles */}
-      <View style={[styles.doodle1, { backgroundColor: isRunning ? Colors.sketch.pink : Colors.sketch.mint }]} />
-      <View style={[styles.doodle2, { backgroundColor: isRunning ? Colors.sketch.pink : Colors.sketch.mint }]} />
-    </AnimatedTouchable>
+    <>
+      <AnimatedTouchable
+        ref={buttonRef}
+        style={[styles.container, dynamicStyles.container, animatedStyle]}
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        activeOpacity={1}
+      >
+        <View style={[styles.inner, dynamicStyles.inner]}>
+          <Text style={styles.emoji}>{isRunning ? '💩' : '🚽'}</Text>
+          <Text style={[styles.text, { color: dynamicStyles.textColor }]}>
+            {isRunning ? '结束' : '开始'}
+          </Text>
+        </View>
+        {/* Decorative doodles */}
+        <View style={[styles.doodle1, { backgroundColor: isRunning ? Colors.sketch.pink : Colors.sketch.mint }]} />
+        <View style={[styles.doodle2, { backgroundColor: isRunning ? Colors.sketch.pink : Colors.sketch.mint }]} />
+      </AnimatedTouchable>
+    </>
   );
 }
 

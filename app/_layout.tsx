@@ -8,6 +8,8 @@ import 'react-native-reanimated';
 
 import { useColorScheme } from '@/components/useColorScheme';
 import SarasaFont from '../assets/fonts/sarasa.ttf';
+import { setupSmartReminders, requestNotificationPermissions } from '@/services/notification';
+import { getReminderSettings } from '@/services/reminderSettings';
 
 export {
   ErrorBoundary,
@@ -18,6 +20,22 @@ export const unstable_settings = {
 };
 
 SplashScreen.preventAutoHideAsync();
+
+// 初始化通知设置
+async function initializeNotifications() {
+  try {
+    const settings = await getReminderSettings();
+    if (settings.enabled) {
+      const granted = await requestNotificationPermissions();
+      if (granted) {
+        await setupSmartReminders();
+        console.log('智能提醒已初始化');
+      }
+    }
+  } catch (error) {
+    console.error('初始化通知失败:', error);
+  }
+}
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
@@ -31,6 +49,8 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
+      // 初始化通知
+      initializeNotifications();
     }
   }, [loaded]);
 
@@ -50,6 +70,7 @@ function RootLayoutNav() {
         <Stack>
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+          <Stack.Screen name="reminder-settings" options={{ headerShown: false }} />
         </Stack>
       </ThemeProvider>
     </GestureHandlerRootView>

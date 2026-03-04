@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { StyleSheet, FlatList, View, Text, TouchableOpacity } from 'react-native';
-import { Swipeable } from 'react-native-gesture-handler';
+import { StyleSheet, View, Text, TouchableOpacity } from 'react-native';
+import { FlatList, Swipeable } from 'react-native-gesture-handler';
 import { initDatabase, getAllRecords, deleteRecord, PoopRecord } from '@/db';
 import { Typography, Colors } from '@/components/ui';
 import dayjs from 'dayjs';
@@ -66,6 +66,9 @@ export default function HistoryScreen() {
         renderRightActions={(progress, dragX, close) => renderRightActions(item.id, close)}
         rightThreshold={40}
         overshootRight={false}
+        activeOffsetX={[-20, 20]}
+        failOffsetY={[-10, 10]}
+        containerStyle={{ backgroundColor: Colors.background }}
       >
         <View style={[styles.itemCard, { backgroundColor: bgColor }]}>
           <View style={styles.itemContent}>
